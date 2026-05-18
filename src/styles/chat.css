@@ -1,0 +1,312 @@
+.chat-container {
+  display: flex;
+  height: 100vh;
+  background: #f8fafc;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid #eee;
+  padding: 15px;
+}
+
+.sidebar-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.mentor-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.mentor-item:hover {
+  background: #f1f5f9;
+}
+
+.mentor-item.active {
+  background: #e0f2fe;
+}
+
+.mentor-item img {
+  width: 40px;
+  border-radius: 10px;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.school {
+  font-size: 12px;
+  color: #888;
+}
+
+/* CHAT */
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.chat-header {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.chat-header img {
+  width: 40px;
+  border-radius: 10px;
+}
+
+/* MESSAGES */
+.messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.msg {
+  margin-bottom: 12px;
+}
+
+.msg.mine {
+  text-align: right;
+}
+
+/* BUBBLE */
+.bubble {
+  position: relative;
+  display: inline-block;
+  padding: 10px 15px 20px;
+  border-radius: 16px;
+  background: #e2e8f0;
+  max-width: 70%;
+}
+
+.msg.mine .bubble {
+  background: linear-gradient(135deg, #17a2b8, #1a3a52);
+  color: white;
+}
+
+.bubble p {
+  margin: 0;
+}
+
+/* TIME FIX CHUẨN */
+.time {
+  position: absolute;
+  bottom: 4px;
+  right: 10px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* INPUT */
+.input-box {
+  display: flex;
+  padding: 10px;
+  background: white;
+  border-top: 1px solid #eee;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.input-box button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  border-radius: 10px;
+  background: #17a2b8;
+  color: white;
+  border: none;
+}
+
+/* RIGHT PANEL */
+.right-panel {
+  width: 240px;
+  background: white;
+  border-left: 1px solid #eee;
+  text-align: center;
+  padding: 20px;
+}
+
+.big-avatar {
+  width: 90px;
+  border-radius: 20px;
+}
+
+.avatar-wrapper {
+  position: relative;
+}
+
+.status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.online {
+  background: #22c55e;
+}
+
+.offline {
+  background: #ccc;
+}
+
+/* Container chính của form chat */
+.chat-form-container {
+  padding: 1rem;
+  background-color: white;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Style chung cho các nút chức năng (Plus, Image) */
+.chat-util-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  background-color: #f8fafc;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.chat-util-btn:hover {
+  background-color: #f1f5f9;
+  color: #00b5ad;
+}
+
+.chat-util-btn:active {
+  transform: scale(0.9);
+}
+
+/* Ô nhập liệu */
+.chat-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.chat-main-input {
+  width: 100%;
+  background-color: #f8fafc;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.75rem 3rem 0.75rem 1rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.chat-main-input:focus {
+  background-color: white;
+  border-color: rgba(0, 181, 173, 0.3);
+  box-shadow: 0 0 0 4px rgba(0, 181, 173, 0.1);
+}
+
+/* Nút Emoji trong input */
+.emoji-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.emoji-btn:hover {
+  color: #f59e0b;
+}
+
+/* NÚT GỬI CHUẨN PRO */
+.send-btn {
+  width: 3rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Khi nút có thể gửi (đã nhập text) */
+.send-btn-active {
+  background-color: #00b5ad;
+  color: white;
+  box-shadow: 0 8px 15px -5px rgba(0, 181, 173, 0.5);
+  cursor: pointer;
+}
+
+.send-btn-active:hover {
+  background-color: #009e98;
+  transform: translateY(-2px);
+}
+
+.send-btn-active:active {
+  transform: scale(0.9);
+}
+
+/* Khi nút bị disable */
+.send-btn-disabled {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Hiệu ứng mũi tên bay khi hover */
+.send-btn-active:hover svg {
+  transform: translate(2px, -2px);
+}
+/* Tinh chỉnh Header Nav */
+nav a {
+    position: relative;
+    letter-spacing: 0.05em;
+}
+
+nav a iconify-icon {
+    font-size: 16px;
+}
+
+/* Hiệu ứng gạch chân mượt mà khi hover */
+nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: #4fd1c5;
+    transition: width 0.3s ease;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Header shadow để tách biệt với body */
+header {
+    z-index: 50;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
