@@ -86,6 +86,7 @@
 // );
 
 // export default api;
+
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -94,13 +95,15 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
-// ✅ Gắn accessToken vào mọi request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
+
+    config.headers["ngrok-skip-browser-warning"] = "true";
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -111,7 +114,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Auto refresh token khi nhận 401
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -141,6 +143,7 @@ api.interceptors.response.use(
         })
           .then((token) => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
+            originalRequest.headers["ngrok-skip-browser-warning"] = "true";
             return api(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -161,7 +164,13 @@ api.interceptors.response.use(
       try {
         const res = await axios.post(
           `${API_BASE_URL}/auth/refresh`,
-          { refreshToken }
+          { refreshToken },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
         );
 
         const newToken = res.data.result.accessToken;
@@ -171,11 +180,10 @@ api.interceptors.response.use(
         processQueue(null, newToken);
 
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        originalRequest.headers["ngrok-skip-browser-warning"] = "true";
 
         return api(originalRequest);
-
       } catch (refreshError) {
-
         processQueue(refreshError, null);
 
         localStorage.clear();
@@ -183,7 +191,6 @@ api.interceptors.response.use(
         window.location.href = "/login";
 
         return Promise.reject(refreshError);
-
       } finally {
         isRefreshing = false;
       }
