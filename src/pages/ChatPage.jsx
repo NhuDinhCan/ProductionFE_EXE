@@ -2,7 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { chatApi } from "../services/chatApi";
 import { connectWebSocket, sendMessage, disconnectWebSocket } from "../services/socket";
 import { logoutApi } from "../services/authService";
-import { decodeToken, getCurrentUserEmail, getCurrentUserId, clearSession } from "../services/tokenUtils";
+import {
+  clearSession,
+  decodeToken,
+  getAccessToken,
+  getCurrentUserEmail,
+  getCurrentUserId,
+  normalizeEmail,
+} from "../services/tokenUtils";
 import "../styles/chat.css";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -21,10 +28,20 @@ export default function ChatPage() {
   const selectedUserRef = useRef(null);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("accessToken");
-  const currentUserEmail = getCurrentUserEmail();
-  const currentUserId = getCurrentUserId();
-  const userPayload = decodeToken(token);
+  const [auth] = useState(() => {
+    const accessToken = getAccessToken();
+    const payload = decodeToken(accessToken);
+    return {
+      token: accessToken,
+      currentUserEmail: normalizeEmail(payload?.sub || getCurrentUserEmail()),
+      currentUserId: payload?.userId ?? getCurrentUserId(),
+      payload,
+    };
+  });
+  const token = auth.token;
+  const currentUserEmail = auth.currentUserEmail;
+  const currentUserId = auth.currentUserId;
+  const userPayload = auth.payload;
   const displayName =
     userPayload?.first_name ||
     currentUserEmail?.split("@")[0] ||
@@ -80,7 +97,9 @@ export default function ChatPage() {
           return [...prev, newMsg];
         });
 
-        if (newMsg.senderEmail !== currentUserEmail && messageConversationId !== currentConversationId) {
+        const senderEmail = normalizeEmail(newMsg.senderEmail);
+
+        if (senderEmail !== currentUserEmail && messageConversationId !== currentConversationId) {
           setUnreadByConversation((prev) => ({
             ...prev,
             [newMsg.conversationId]: (prev[newMsg.conversationId] || 0) + 1,
@@ -92,13 +111,13 @@ export default function ChatPage() {
           const conversationUser = prev.find(
             (u) => Number(u.conversationId) === messageConversationId
           );
-          const otherEmail = newMsg.senderEmail === currentUserEmail
-            ? conversationUser?.email || selected?.email
-            : newMsg.senderEmail;
+          const otherEmail = senderEmail === currentUserEmail
+            ? normalizeEmail(conversationUser?.email || selected?.email)
+            : senderEmail;
 
           return prev
             .map((u) =>
-              u.email === otherEmail
+              normalizeEmail(u.email) === otherEmail
                 ? {
                   ...u,
                   conversationId: newMsg.conversationId,
@@ -265,7 +284,7 @@ export default function ChatPage() {
 
           <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white">
             {messages.map((m, i) => {
-              const isMe = m.senderEmail === currentUserEmail;
+              const isMe = normalizeEmail(m.senderEmail) === currentUserEmail;
               const time = m.createdAt
                 ? new Date(m.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
                 : "";

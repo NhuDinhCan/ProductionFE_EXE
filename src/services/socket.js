@@ -1,9 +1,14 @@
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+import { getAccessToken } from "./tokenUtils";
 
 let stompClient = null;
 
 const WS_URL = import.meta.env.VITE_WS_URL?.trim();
+
+if (!WS_URL) {
+  throw new Error("VITE_WS_URL is required");
+}
 
 export const connectWebSocket = (
   token,
@@ -18,6 +23,12 @@ export const connectWebSocket = (
     webSocketFactory: () => new SockJS(WS_URL),
     connectHeaders: {
       Authorization: `Bearer ${token}`,
+    },
+    beforeConnect: () => {
+      const freshToken = getAccessToken() || token;
+      stompClient.connectHeaders = {
+        Authorization: `Bearer ${freshToken}`,
+      };
     },
     reconnectDelay: 5000,
     heartbeatIncoming: 10000,

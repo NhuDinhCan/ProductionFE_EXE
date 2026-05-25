@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { suggestUniversity } from "../services/universityService";
 import { Icon } from "@iconify/react";
+import { clearSession, getCurrentUserEmail, isLoggedIn as hasSession } from "../services/tokenUtils";
 
 export default function UniversityPage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const isLoggedIn = !!localStorage.getItem("accessToken");
+    const isLoggedIn = hasSession();
+    const currentUserEmail = getCurrentUserEmail();
 
     const { careerId, careerName, score } = location.state || {};
 
     const [universities, setUniversities] = useState([]);
 
     const handleLogout = () => {
-        localStorage.clear();
+        clearSession();
         navigate("/");
         window.location.reload();
     };
@@ -102,12 +104,12 @@ export default function UniversityPage() {
                                 <div className="flex flex-col items-end">
                                     <span className="text-[9px] text-[#17a2b8] font-black tracking-tighter uppercase">Student Account</span>
                                     <span className="text-xs font-bold text-white group-hover:text-[#17a2b8] transition-colors">
-                                        {localStorage.getItem("userEmail")?.split('@')[0]}
+                                        {currentUserEmail?.split('@')[0]}
                                     </span>
                                 </div>
                                 <div className="w-8 h-8 rounded-full bg-[#17a2b8]/20 flex items-center justify-center border border-[#17a2b8]/30 overflow-hidden">
                                     <img
-                                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${localStorage.getItem("userEmail")}`}
+                                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserEmail}`}
                                         alt="avt"
                                     />
                                 </div>

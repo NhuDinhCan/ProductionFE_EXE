@@ -1,25 +1,31 @@
-import React, { useEffect } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import heroImage from '../assets/graduating.png';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { clearSession, getCurrentUserEmail, isLoggedIn as hasSession } from "../services/tokenUtils";
 
 const HomePage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const mobileMenuRef = useRef(null);
 
     // 1. Kiểm tra trạng thái đăng nhập
-    const isLoggedIn = !!localStorage.getItem("accessToken");
+    const isLoggedIn = hasSession();
+    const currentUserEmail = getCurrentUserEmail();
+    const username = currentUserEmail?.split("@")[0] || "bạn";
 
     // 2. Hàm đăng xuất
     const handleLogout = () => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("userEmail");
+        clearSession();
+        setIsMobileMenuOpen(false);
         navigate("/");
         window.location.reload(); // Reload để reset toàn bộ state của ứng dụng
     };
 
     const handleMentorClick = (e) => {
         e.preventDefault();
+        setIsMobileMenuOpen(false);
         if (isLoggedIn) {
             navigate("/chat");
         } else {
@@ -29,11 +35,55 @@ const HomePage = () => {
 
     const handleStrategyClick = (e) => {
         e.preventDefault();
+        setIsMobileMenuOpen(false);
         if (isLoggedIn) {
             navigate("/strategy");
         } else {
             navigate("/login");
         }
+    };
+
+    const handleAiAssistantClick = (e) => {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+        if (isLoggedIn) {
+            navigate("/ai-assistant");
+        } else {
+            navigate("/login");
+        }
+    };
+
+    const handleStartClick = (e) => {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+        navigate(isLoggedIn ? "/strategy" : "/register");
+    };
+
+    const handleLoginClick = (e) => {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+        navigate("/login");
+    };
+
+    const handleRegisterClick = (e) => {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+        navigate("/register");
+    };
+
+    const scrollToHowItWorks = () => {
+        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const handleHowItWorksClick = (e) => {
+        e.preventDefault();
+
+        if (location.pathname !== "/") {
+            navigate("/", { state: { scrollToHowItWorks: true } });
+            return;
+        }
+
+        scrollToHowItWorks();
     };
 
     useEffect(() => {
@@ -48,80 +98,161 @@ const HomePage = () => {
             el.classList.add("reveal-up");
             observer.observe(el);
         });
+
+        if (location.state?.scrollToHowItWorks) {
+            requestAnimationFrame(() => {
+                scrollToHowItWorks();
+                navigate(location.pathname, { replace: true, state: null });
+            });
+        }
+    }, [location.pathname, location.state, navigate]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+
+        const handleOutsideClick = (event) => {
+            if (!mobileMenuRef.current) return;
+            if (!mobileMenuRef.current.contains(event.target)) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+
+        window.addEventListener("resize", handleResize);
+        document.addEventListener("mousedown", handleOutsideClick);
+        document.addEventListener("touchstart", handleOutsideClick);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            document.removeEventListener("mousedown", handleOutsideClick);
+            document.removeEventListener("touchstart", handleOutsideClick);
+        };
     }, []);
 
     return (
         <div className="min-h-screen flex flex-col font-satoshi bg-white scroll-smooth">
-            <header className="bg-[#1a3a52] text-white px-8 py-5 flex items-center justify-between sticky top-0 z-50 shadow-xl">
-                {/* Logo & Brand */}
-                <Link to="/" className="flex items-center gap-4 hover:opacity-90">
-                    <div className="bg-[#17a2b8] p-2.5 rounded-xl shadow-lg shadow-teal/20">
-                        <Icon icon="lucide:graduation-cap" className="text-2xl text-white" />
-                    </div>
-                    <div>
-                        <h1 className="font-bold text-xl">TGrowth Pro</h1>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Smart Career Hub</p>
-                    </div>
-                </Link>
+            <header className="bg-[#1a3a52] text-white px-4 sm:px-6 lg:px-8 py-4 sticky top-0 z-50 shadow-xl relative">
+                <div className="flex items-center justify-between gap-4">
+                    <Link to="/" className="flex items-center gap-3 hover:opacity-90 min-w-0">
+                        <div className="bg-[#17a2b8] p-2.5 rounded-xl shadow-lg shadow-teal/20 shrink-0">
+                            <Icon icon="lucide:graduation-cap" className="text-2xl text-white" />
+                        </div>
+                        <div className="min-w-0">
+                            <h1 className="font-bold text-lg sm:text-xl leading-tight">TGrowth Pro</h1>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest hidden sm:block">
+                                Smart Career Hub
+                            </p>
+                        </div>
+                    </Link>
 
-                {/* Navigation Menu */}
-                <nav className="hidden lg:flex items-center gap-10 text-[11px] font-bold uppercase tracking-wider text-slate-300">
-                    <a href="#features" className="hover:text-white transition-colors">Tính năng</a>
-
-                    {/* NÚT LỘ TRÌNH MỚI THÊM */}
-                    <button
-                        onClick={handleStrategyClick}
-                        className="flex items-center gap-2 hover:text-[#17a2b8] transition-colors cursor-pointer uppercase"
-                    >
-                        Lộ trình cá nhân
-                    </button>
-
-                    <button
-                        onClick={handleMentorClick}
-                        className="flex items-center gap-2 hover:text-[#17a2b8] transition-colors group cursor-pointer uppercase"
-                    >
-                        <span className="relative">
-                            Kết nối Mentor
-                            <span className="absolute -top-1 -right-4 flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-                            </span>
-                        </span>
-                    </button>
-
-                    <a href="#testimonials" className="hover:text-white transition-colors">Cảm nhận</a>
-                </nav>
-
-                {/* Auth & CTA */}
-                <div className="flex items-center gap-4">
-                    {isLoggedIn ? (
-                        <div className="flex items-center gap-4 border-r border-slate-700 pr-4 mr-2">
-                            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 hidden md:flex transition-all hover:bg-white/20">
-                                <div className="w-2 h-2 rounded-full bg-[#4fd1c5] animate-pulse"></div>
-                                <span className="text-xs font-bold tracking-wide text-white">
-                                    Chào, <span className="text-[#4fd1c5] uppercase">{localStorage.getItem("userEmail")?.split('@')[0]}</span>
+                    <nav className="hidden lg:flex items-center gap-9 text-[11px] font-bold uppercase tracking-wider text-slate-300">
+                        <a href="#features" className="hover:text-white transition-colors">Tính năng</a>
+                        <button onClick={handleStrategyClick} className="hover:text-[#17a2b8] transition-colors cursor-pointer uppercase">Lộ trình cá nhân</button>
+                        <button onClick={handleMentorClick} className="flex items-center gap-2 hover:text-[#17a2b8] transition-colors group cursor-pointer uppercase">
+                            <span className="relative">
+                                Kết nối Mentor
+                                <span className="absolute -top-1 -right-4 flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
                                 </span>
+                            </span>
+                        </button>
+                        <a href="#testimonials" className="hover:text-white transition-colors">Cảm nhận</a>
+                    </nav>
+
+                    <div className="hidden lg:flex items-center gap-3 xl:gap-4">
+                        {isLoggedIn ? (
+                            <>
+                                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 transition-all hover:bg-white/20">
+                                    <div className="w-2 h-2 rounded-full bg-[#4fd1c5] animate-pulse"></div>
+                                    <span className="text-xs font-bold tracking-wide text-white whitespace-nowrap">
+                                        Chào, <span className="text-[#4fd1c5] uppercase">{username}</span>
+                                    </span>
+                                </div>
+                                <button onClick={handleLogout} className="text-sm font-bold text-red-400 hover:text-red-300 transition-colors whitespace-nowrap">Đăng xuất</button>
+                                <button onClick={handleStartClick} className="px-5 py-3 bg-[#17a2b8] text-white rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg whitespace-nowrap">Bắt đầu ngay</button>
+                            </>
+                        ) : (
+                            <>
+                                <button onClick={handleLoginClick} className="text-sm font-bold text-slate-200 hover:text-white transition-colors whitespace-nowrap">Đăng nhập</button>
+                                <button onClick={handleRegisterClick} className="px-5 py-3 bg-[#17a2b8] text-white rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg whitespace-nowrap">Đăng ký</button>
+                                <button onClick={handleStartClick} className="px-5 py-3 bg-white/10 text-white rounded-xl font-bold text-sm hover:bg-white/20 transition-colors whitespace-nowrap">Bắt đầu ngay</button>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="flex lg:hidden items-center gap-2">
+                        <button onClick={handleStartClick} className="px-4 py-2.5 bg-[#17a2b8] text-white rounded-xl font-bold text-sm shadow-lg whitespace-nowrap">Bắt đầu ngay</button>
+                        <button type="button" aria-label="Mở menu" aria-expanded={isMobileMenuOpen} onClick={() => setIsMobileMenuOpen((prev) => !prev)} className="h-11 w-11 rounded-xl border border-white/15 bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors">
+                            <Icon icon={isMobileMenuOpen ? "lucide:x" : "lucide:menu"} className="text-xl" />
+                        </button>
+                    </div>
+                </div>
+
+                {isMobileMenuOpen && (
+                    <div ref={mobileMenuRef} className="lg:hidden absolute left-0 right-0 top-full mt-3 mx-4 sm:mx-6 rounded-2xl border border-slate-700/10 bg-white text-[#0f2c3f] shadow-2xl overflow-hidden z-50">
+                        <div className="flex items-center justify-between px-4 py-3 bg-[#0f2c3f] text-white">
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Menu</p>
+                                <p className="text-sm font-bold">TGrowth Pro</p>
                             </div>
-                            <button
-                                onClick={handleLogout}
-                                className="text-sm font-bold text-red-400 hover:text-red-300 transition-colors"
-                            >
-                                Đăng xuất
+                            <button type="button" aria-label="Đóng menu" onClick={() => setIsMobileMenuOpen(false)} className="h-9 w-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                                <Icon icon="lucide:x" className="text-lg" />
                             </button>
                         </div>
-                    ) : (
-                        <Link to="/login" className="hidden sm:block text-sm font-bold hover:text-[#17a2b8] transition-colors">
-                            Đăng nhập
-                        </Link>
-                    )}
 
-                    <Link
-                        to="/quiz"
-                        className="px-6 py-3 bg-[#17a2b8] text-white rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-lg"
-                    >
-                        Bắt đầu ngay
-                    </Link>
-                </div>
+                        <div className="p-3 grid gap-2">
+                            <button onClick={handleStrategyClick} className="flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-slate-50 text-left">
+                                <Icon icon="lucide:book-open-check" className="text-[#17a2b8]" />
+                                <span className="font-semibold">Lộ trình cá nhân</span>
+                            </button>
+                            <button onClick={handleMentorClick} className="flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-slate-50 text-left">
+                                <Icon icon="lucide:message-circle" className="text-emerald-500" />
+                                <span className="font-semibold">Kết nối Mentor</span>
+                            </button>
+                            <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-slate-50">
+                                <Icon icon="lucide:layout-grid" className="text-slate-500" />
+                                <span className="font-semibold">Tính năng</span>
+                            </a>
+                            <a href="#testimonials" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-slate-50">
+                                <Icon icon="lucide:message-square-more" className="text-slate-500" />
+                                <span className="font-semibold">Cảm nhận</span>
+                            </a>
+                            {isLoggedIn && (
+                                <button onClick={handleAiAssistantClick} className="flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-slate-50 text-left">
+                                    <Icon icon="lucide:bot-message-square" className="text-cyan-600" />
+                                    <span className="font-semibold">Hỏi đáp trợ lý AI</span>
+                                </button>
+                            )}
+
+                            <div className="h-px bg-slate-100 my-1" />
+
+                            {isLoggedIn ? (
+                                <>
+                                    <div className="px-4 py-2 text-sm text-slate-500">Chào, <span className="font-bold text-[#0f2c3f]">{username}</span></div>
+                                    <button onClick={handleLogout} className="flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-red-50 text-left text-red-600">
+                                        <Icon icon="lucide:log-out" />
+                                        <span className="font-semibold">Đăng xuất</span>
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button onClick={handleLoginClick} className="flex items-center gap-3 rounded-xl px-4 py-3 hover:bg-slate-50 text-left">
+                                        <Icon icon="lucide:log-in" className="text-slate-500" />
+                                        <span className="font-semibold">Đăng nhập</span>
+                                    </button>
+                                    <button onClick={handleRegisterClick} className="flex items-center gap-3 rounded-xl px-4 py-3 bg-[#17a2b8] text-white text-left">
+                                        <Icon icon="lucide:user-plus" />
+                                        <span className="font-semibold">Đăng ký</span>
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
             </header>
 
             <main className="flex-1">
@@ -158,8 +289,11 @@ const HomePage = () => {
                                     />
                                 </Link>
 
-                                {/* Có thể thêm một nút phụ bên cạnh nếu muốn (Ví dụ: Xem giới thiệu) */}
-                                <button className="text-[#1a3a52] font-bold text-sm hover:underline decoration-2 underline-offset-4 transition-all">
+                                <button
+                                    type="button"
+                                    onClick={handleHowItWorksClick}
+                                    className="text-[#1a3a52] font-bold text-sm hover:underline decoration-2 underline-offset-4 transition-all"
+                                >
                                     Tìm hiểu cách hoạt động
                                 </button>
                             </div>
@@ -179,6 +313,77 @@ const HomePage = () => {
                                     className="w-full max-w-lg mx-auto rounded-2xl border border-[#22c55e]/20"
                                 />
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="how-it-works" className="py-32 px-8 bg-gradient-to-b from-slate-50 to-white">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="max-w-3xl mb-12">
+                            <h3 className="text-sm font-black text-[#17a2b8] uppercase tracking-[0.3em] mb-4">
+                                Cách hoạt động
+                            </h3>
+                            <h2 className="text-4xl lg:text-5xl font-black text-[#1a3a52] mb-5 tracking-tight">
+                                Cách TGrowth Pro hoạt động
+                            </h2>
+                            <p className="text-slate-500 text-lg leading-relaxed max-w-2xl">
+                                TGrowth Pro giúp học sinh/sinh viên định hướng ngành học, chọn phương pháp học phù hợp và xây dựng lộ trình học cá nhân hóa.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                            {[
+                                {
+                                    step: "Bước 1",
+                                    title: "Làm bài quiz định hướng",
+                                    description:
+                                        "Người dùng trả lời các câu hỏi về sở thích, năng lực, thói quen và mục tiêu học tập.",
+                                    icon: "lucide:clipboard-list",
+                                    tone: "from-[#17a2b8] to-[#1a3a52]",
+                                },
+                                {
+                                    step: "Bước 2",
+                                    title: "Hệ thống gợi ý ngành phù hợp",
+                                    description:
+                                        "Dựa trên điểm số từ bài quiz, hệ thống phân tích và đề xuất những ngành học phù hợp nhất.",
+                                    icon: "lucide:brain-circuit",
+                                    tone: "from-emerald-500 to-teal-600",
+                                },
+                                {
+                                    step: "Bước 3",
+                                    title: "Nhập điểm để xem trường phù hợp",
+                                    description:
+                                        "Người dùng nhập điểm hoặc chọn khu vực để xem các trường đại học có ngành tương ứng và mức điểm phù hợp.",
+                                    icon: "lucide:school",
+                                    tone: "from-indigo-500 to-sky-600",
+                                },
+                                {
+                                    step: "Bước 4",
+                                    title: "Tạo lộ trình học cá nhân",
+                                    description:
+                                        "Sau khi chọn ngành, hệ thống gợi ý phương pháp học, kỹ năng cần rèn, công cụ nên dùng và thời khóa biểu học tập.",
+                                    icon: "lucide:calendar-range",
+                                    tone: "from-amber-500 to-orange-600",
+                                },
+                            ].map((item) => (
+                                <article
+                                    key={item.step}
+                                    className="group rounded-[2rem] bg-white border border-slate-100 shadow-sm p-7 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                                >
+                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.tone} text-white flex items-center justify-center mb-6 shadow-lg`}>
+                                        <Icon icon={item.icon} className="text-2xl" />
+                                    </div>
+                                    <p className="text-[10px] uppercase tracking-[0.3em] font-black text-slate-400 mb-3">
+                                        {item.step}
+                                    </p>
+                                    <h3 className="text-xl font-black text-[#1a3a52] mb-3 leading-snug">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-slate-500 text-sm leading-relaxed">
+                                        {item.description}
+                                    </p>
+                                </article>
+                            ))}
                         </div>
                     </div>
                 </section>
@@ -425,3 +630,5 @@ const HomePage = () => {
 }
 
 export default HomePage;
+
+

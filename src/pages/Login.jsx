@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginApi } from "../services/authService";
+import { setAuthSession } from "../services/tokenUtils";
 import "../styles/auth.css";
 
 export default function Login() {
@@ -19,9 +20,7 @@ export default function Login() {
       const res = await loginApi(form);
       const { accessToken, refreshToken } = res.data.result || {};
       if (accessToken) {
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("userEmail", form.email);
+        setAuthSession({ accessToken, refreshToken, userEmail: form.email });
         navigate("/");
       } else {
         setError("Đăng nhập thất bại, vui lòng thử lại.");
