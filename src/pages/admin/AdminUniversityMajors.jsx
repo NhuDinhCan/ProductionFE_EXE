@@ -20,7 +20,7 @@ export default function AdminUniversityMajors() {
       fields={[
         { name: "universityId", label: "Trường", type: "select", optionsKey: "universities", required: true },
         { name: "careerId", label: "Ngành", type: "select", optionsKey: "careers", required: true },
-        { name: "scoreRequired", label: "Điểm chuẩn", type: "number", min: 0 },
+          { name: "scoreRequired", label: "Điểm chuẩn", type: "number", min: 0, step: "0.01" },
       ]}
     />
   );

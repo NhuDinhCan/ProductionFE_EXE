@@ -67,6 +67,7 @@ const LearningStrategy = () => {
   const [applyingMethodId, setApplyingMethodId] = useState(null);
   const [applyMessage, setApplyMessage] = useState("");
   const [todaySchedules, setTodaySchedules] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const selectedCareerId = useMemo(() => {
     const raw = strategy?.careerId || selectedMajor;
@@ -219,17 +220,29 @@ const LearningStrategy = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f1f5f9] font-sans">
-      <header className="h-16 bg-[#0f2c3f] text-white flex justify-between items-center px-6 fixed top-0 w-full z-50 shadow-lg">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-all cursor-pointer">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#f1f5f9] font-sans">
+      <header className="h-16 bg-[#0f2c3f] text-white flex justify-between items-center px-4 sm:px-6 fixed top-0 w-full z-50 shadow-lg">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-cyan-100 transition hover:bg-white/20 lg:hidden"
+            aria-label="Mở menu"
+            aria-expanded={sidebarOpen}
+          >
+            <Icon icon="lucide:menu" className="text-xl" />
+          </button>
+
+          <Link to="/" className="flex min-w-0 items-center gap-2 hover:opacity-80 transition-all cursor-pointer">
           <div className="bg-cyan-500 p-1.5 rounded-lg">
             <Icon icon="lucide:graduation-cap" className="text-xl" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="font-bold leading-none text-lg tracking-tight">TGrowth Pro</h1>
             <p className="text-[10px] opacity-60 font-medium uppercase tracking-tighter">Cố vấn học tập 4.0</p>
           </div>
-        </Link>
+          </Link>
+        </div>
 
         <div className="flex items-center gap-6">
           <div className="hidden md:flex flex-col items-end border-r border-white/10 pr-6">
@@ -279,8 +292,34 @@ const LearningStrategy = () => {
         </div>
       </header>
 
-      <div className="flex pt-16 h-full">
-        <aside className="w-64 bg-white border-r border-gray-100 p-6 fixed left-0 h-[calc(100vh-64px)] overflow-y-auto z-40">
+      <div className="flex h-full pt-16">
+        {sidebarOpen && (
+          <button
+            type="button"
+            className="fixed inset-x-0 bottom-0 top-16 z-30 bg-slate-950/50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Đóng menu"
+          />
+        )}
+
+        <aside
+          className={`fixed left-0 top-16 z-40 h-[calc(100vh-64px)] w-64 max-w-[85vw] overflow-y-auto border-r border-gray-100 bg-white p-6 transition-transform duration-200 lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="mb-4 flex items-center justify-between lg:hidden">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              Menu
+            </p>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500"
+              aria-label="Đóng menu"
+            >
+              <Icon icon="lucide:x" />
+            </button>
+          </div>
           <nav className="flex flex-col h-full justify-between">
             <div className="space-y-8">
               <div>
@@ -292,19 +331,19 @@ const LearningStrategy = () => {
                     <Icon icon="lucide:book-open-check" />
                     <span className="text-sm">Chiến lược học tập</span>
                   </div>
-                  <Link to="/ai-assistant" className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
+                  <Link to="/ai-assistant" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
                     <Icon icon="lucide:message-circle" className="group-hover:text-cyan-500" />
                     <span className="text-sm font-medium">Hỏi đáp trợ lý AI</span>
                   </Link>
-                  <Link to="/schedule" className="w-full flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group text-left">
+                  <Link to="/schedule" onClick={() => setSidebarOpen(false)} className="w-full flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group text-left">
                     <Icon icon="lucide:calendar-range" className="group-hover:text-cyan-500" />
                     <span className="text-sm font-medium">Thời khóa biểu</span>
                   </Link>
-                  <Link to="/resources" className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
+                  <Link to="/resources" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
                     <Icon icon="lucide:folder-kanban" className="group-hover:text-cyan-500" />
                     <span className="text-sm font-medium">Kho tài liệu</span>
                   </Link>
-                  <Link to="/mock-exams" className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
+                  <Link to="/mock-exams" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all cursor-pointer group">
                     <Icon icon="lucide:clipboard-pen-line" className="group-hover:text-cyan-500" />
                     <span className="text-sm font-medium">Luyện đề thi thử</span>
                   </Link>
@@ -338,13 +377,13 @@ const LearningStrategy = () => {
           </nav>
         </aside>
 
-        <main className="flex-1 ml-64 p-8 bg-[#f8fafc]">
-          <section className="bg-white rounded-[3rem] p-12 relative overflow-hidden shadow-sm mb-8 border border-white group">
+        <main className="min-w-0 flex-1 bg-[#f8fafc] p-4 sm:p-6 lg:ml-64 lg:p-8">
+          <section className="bg-white rounded-[2rem] lg:rounded-[3rem] p-5 sm:p-8 lg:p-12 relative overflow-hidden shadow-sm mb-8 border border-white group">
             <div className="max-w-3xl relative z-10">
               <span className="bg-[#00a8b5] text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
                 Chiến lược cá nhân hóa
               </span>
-              <h1 className="text-5xl font-black text-[#0f2c3f] mt-8 mb-4 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f2c3f] mt-8 mb-4 leading-tight">
                 Lộ trình học theo ngành <br />
                 <span className="text-[#00a8b5]">{strategy?.major || "bạn quan tâm"}</span>
               </h1>
@@ -403,7 +442,7 @@ const LearningStrategy = () => {
             </section>
           )}
 
-          <div className="flex justify-between items-end mb-8 px-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-end mb-8 px-2">
             <div>
               <h2 className="text-2xl font-black text-[#0f2c3f] flex items-center gap-2">
                 <Icon icon="lucide:layout-template" className="text-[#00a8b5]" />

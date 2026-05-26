@@ -54,6 +54,7 @@ export default function ResourcePage() {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
   const [message, setMessage] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const filteredTitle = useMemo(() => {
     if (!careerId) return "Kho tài liệu học tập";
@@ -149,19 +150,31 @@ export default function ResourcePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans">
-      <header className="h-16 bg-[#0f2c3f] text-white flex justify-between items-center px-6 fixed top-0 w-full z-50 shadow-lg">
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-all">
+    <div className="min-h-screen overflow-x-hidden bg-[#f8fafc] font-sans">
+      <header className="h-16 bg-[#0f2c3f] text-white flex justify-between items-center px-4 sm:px-6 fixed top-0 w-full z-50 shadow-lg">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-cyan-100 transition hover:bg-white/20 lg:hidden"
+            aria-label="Mở menu"
+            aria-expanded={sidebarOpen}
+          >
+            <Icon icon="lucide:menu" className="text-xl" />
+          </button>
+
+        <Link to="/" className="flex min-w-0 items-center gap-2 hover:opacity-80 transition-all">
           <div className="bg-cyan-500 p-1.5 rounded-lg">
             <Icon icon="lucide:graduation-cap" className="text-xl" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="font-bold leading-none text-lg tracking-tight">TGrowth Pro</h1>
             <p className="text-[10px] opacity-60 font-medium uppercase tracking-tighter">
               Kho tài liệu học tập
             </p>
           </div>
         </Link>
+        </div>
 
         <div className="flex items-center gap-4">
           <div className="text-right hidden sm:block">
@@ -178,10 +191,37 @@ export default function ResourcePage() {
       </header>
 
       <div className="flex pt-16">
-        <aside className="w-64 bg-white border-r border-gray-100 p-6 fixed left-0 h-[calc(100vh-64px)] overflow-y-auto z-40">
+        {sidebarOpen && (
+          <button
+            type="button"
+            className="fixed inset-x-0 bottom-0 top-16 z-30 bg-slate-950/50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Đóng menu"
+          />
+        )}
+
+        <aside
+          className={`fixed left-0 top-16 z-40 h-[calc(100vh-64px)] w-64 max-w-[85vw] overflow-y-auto border-r border-gray-100 bg-white p-6 transition-transform duration-200 lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="mb-4 flex items-center justify-between lg:hidden">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              Menu
+            </p>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-500"
+              aria-label="Đóng menu"
+            >
+              <Icon icon="lucide:x" />
+            </button>
+          </div>
           <nav className="space-y-2">
             <Link
               to="/strategy"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all"
             >
               <Icon icon="lucide:book-open-check" />
@@ -190,6 +230,7 @@ export default function ResourcePage() {
 
             <Link
               to="/schedule"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all"
             >
               <Icon icon="lucide:calendar-range" />
@@ -198,6 +239,7 @@ export default function ResourcePage() {
 
             <Link
               to="/ai-assistant"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all"
             >
               <Icon icon="lucide:message-circle" />
@@ -211,6 +253,7 @@ export default function ResourcePage() {
 
             <Link
               to="/mock-exams"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center gap-3 p-3 text-gray-500 hover:bg-gray-50 rounded-xl transition-all"
             >
               <Icon icon="lucide:clipboard-pen-line" />
@@ -219,14 +262,14 @@ export default function ResourcePage() {
           </nav>
         </aside>
 
-        <main className="flex-1 ml-64 p-8">
+        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:ml-64 lg:p-8">
           <section className="mb-8">
             <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
               <div>
                 <span className="bg-[#00a8b5] text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
                   Tài liệu theo ngành
                 </span>
-                <h1 className="text-4xl font-black text-[#0f2c3f] mt-5">
+                <h1 className="text-3xl sm:text-4xl font-black text-[#0f2c3f] mt-5">
                   {filteredTitle}
                 </h1>
                 <p className="text-sm text-slate-500 mt-2 max-w-2xl">

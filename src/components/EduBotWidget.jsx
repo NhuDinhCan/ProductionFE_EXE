@@ -469,19 +469,19 @@ export default function EduBotWidget() {
       };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9990]">
+    <div className="fixed bottom-4 right-4 z-[9990] sm:bottom-6 sm:right-6">
       <div
         ref={popupRef}
         style={popupStyle}
         className={`fixed flex overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-2xl shadow-slate-400/40 transition-all duration-200 ${
-          isDesktop ? "w-[380px]" : "w-[calc(100vw-24px)]"
+          isDesktop ? "w-[380px] max-w-[380px]" : "w-[calc(100vw-24px)] max-w-[calc(100vw-24px)]"
         } ${
           open
             ? collapsed
               ? "h-16 opacity-100 scale-100"
               : isDesktop
                 ? "h-[520px] opacity-100 scale-100"
-                : "h-[70vh] opacity-100 scale-100"
+                : "h-[70vh] max-h-[calc(100vh-112px)] opacity-100 scale-100"
             : "pointer-events-none translate-y-3 scale-95 opacity-0"
         } ${dragging ? "select-none" : ""}`}
         aria-hidden={!open}

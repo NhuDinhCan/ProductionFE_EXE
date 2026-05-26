@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { chatApi } from "../services/chatApi";
+import { Icon } from "@iconify/react";
 import { connectWebSocket, sendMessage, disconnectWebSocket } from "../services/socket";
 import { logoutApi } from "../services/authService";
 import {
@@ -23,6 +24,7 @@ export default function ChatPage() {
   const [convId, setConvId] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [unreadByConversation, setUnreadByConversation] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const scrollRef = useRef();
   const selectedConversationIdRef = useRef(null);
   const selectedUserRef = useRef(null);
@@ -201,18 +203,30 @@ export default function ChatPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden font-sans bg-[#f8fafc]">
       {/* HEADER */}
-      <header className="h-16 bg-[#0f2c3f] text-white flex justify-between items-center px-6 shrink-0 z-50 shadow-md">
-        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-all cursor-pointer">
+      <header className="h-16 bg-[#0f2c3f] text-white flex justify-between items-center px-4 sm:px-6 shrink-0 z-50 shadow-md">
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-cyan-100 transition hover:bg-white/20 lg:hidden"
+            aria-label="Mở danh sách chat"
+            aria-expanded={sidebarOpen}
+          >
+            <Icon icon="lucide:menu" className="text-xl" />
+          </button>
+
+        <Link to="/" className="flex min-w-0 items-center gap-3 hover:opacity-80 transition-all cursor-pointer">
           <div className="bg-[#4fd1c5] p-1.5 rounded-lg">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.657 2.686 3 6 3s6-1.343 6-3v-5"/></svg>
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="font-bold text-base leading-tight">TGrowth Pro</h1>
             <p className="text-[10px] text-gray-300">Kết nối cộng đồng sinh viên giỏi</p>
           </div>
         </Link>
+        </div>
 
-        <div className="flex items-center gap-4 border-l border-gray-700 pl-6">
+        <div className="flex items-center gap-3 border-l border-gray-700 pl-3 sm:gap-4 sm:pl-6">
           <p className="text-sm font-medium hidden sm:block">{displayName}</p>
           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUserEmail}`}
             className="w-9 h-9 rounded-full bg-white p-0.5 border border-gray-600" alt="avatar" />
@@ -223,9 +237,22 @@ export default function ChatPage() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="relative flex flex-1 overflow-hidden">
+        {sidebarOpen && (
+          <button
+            type="button"
+            className="fixed inset-x-0 bottom-0 top-16 z-30 bg-slate-950/50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Đóng danh sách chat"
+          />
+        )}
+
         {/* SIDEBAR */}
-        <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
+        <aside
+          className={`fixed bottom-0 left-0 top-16 z-40 flex w-80 max-w-[85vw] flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           <div className="p-4 border-b">
             <input
               placeholder="Tìm kiếm..."
@@ -239,7 +266,10 @@ export default function ChatPage() {
               return (
                 <div
                   key={u.id}
-                  onClick={() => setSelectedUser(u)}
+                  onClick={() => {
+                    setSelectedUser(u);
+                    setSidebarOpen(false);
+                  }}
                   className={`p-4 flex gap-3 cursor-pointer hover:bg-gray-50 transition-colors ${selectedUser?.id === u.id ? "bg-cyan-50/50" : ""}`}
                 >
                   <div className="relative">
@@ -268,21 +298,21 @@ export default function ChatPage() {
         </aside>
 
         {/* MAIN CHAT */}
-        <main className="flex-1 flex flex-col bg-white">
-          <header className="h-16 px-6 border-b border-gray-100 flex items-center gap-3 shrink-0">
+        <main className="min-w-0 flex-1 flex flex-col bg-white">
+          <header className="h-16 px-4 sm:px-6 border-b border-gray-100 flex items-center gap-3 shrink-0">
             <img src={selectedUser?.avatar || DEFAULT_AVATAR} className="w-10 h-10 rounded-xl" alt="selected" />
-            <div>
+            <div className="min-w-0">
               <h3 className="text-sm font-bold text-gray-800">
                 {selectedUser ? `${selectedUser.firstName || ""} ${selectedUser.lastName || ""}`.trim() : "Chọn người dùng"}
               </h3>
-              <p className="text-[11px] text-[#00b5ad] font-semibold">
+              <p className="truncate text-[11px] text-[#00b5ad] font-semibold">
                 {selectedUser?.email || ""}
                 {connectionStatus !== "connected" && " - reconnecting"}
               </p>
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-white">
             {messages.map((m, i) => {
               const isMe = normalizeEmail(m.senderEmail) === currentUserEmail;
               const time = m.createdAt
@@ -297,7 +327,7 @@ export default function ChatPage() {
                     className="w-9 h-9 rounded-xl mt-1 object-cover bg-slate-100"
                     alt="avt"
                   />
-                  <div className={`flex flex-col max-w-[70%] ${isMe ? "items-end" : "items-start"}`}>
+                  <div className={`flex flex-col max-w-[82%] sm:max-w-[70%] ${isMe ? "items-end" : "items-start"}`}>
                     <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${isMe
                       ? "bg-[#0f4c5c] text-white rounded-tr-none"
                       : "bg-white text-slate-700 border border-slate-100 rounded-tl-none"}`}>

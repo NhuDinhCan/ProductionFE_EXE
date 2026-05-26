@@ -415,14 +415,15 @@ export default function AdminCrudPage({
     }
 
     return (
-      <input
-        type={field.type || "text"}
-        value={value}
-        onChange={(event) => updateForm(field.name, event.target.value)}
-        className={commonClass}
-        required={field.required}
-        min={field.min}
-      />
+        <input
+            type={field.type || "text"}
+            value={value}
+            onChange={(event) => updateForm(field.name, event.target.value)}
+            className={commonClass}
+            required={field.required}
+            min={field.min}
+            step={field.step || (field.type === "number" ? "any" : undefined)}
+        />
     );
   };
 
